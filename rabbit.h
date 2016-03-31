@@ -30,11 +30,11 @@ void counter_system(){
 	for(int i=0;i<8;i++) old_C[i]=C[i];
 
 	temp = (C[0] & 0xFFFFFFFFll) + (A[0] & 0xFFFFFFFFll) + carry;
-    C[0] = (unsigned int) (t & 0xFFFFFFFFll);
+    C[0] = (unsigned int) (temp & 0xFFFFFFFFll);
 
 	for(int i=1;i<8;i++) {
 		temp = (C[i] & 0xFFFFFFFFll) + (A[i] & 0xFFFFFFFFll) + (old_C[i-1]>C[i-1]);
-		C[i] = (unsigned int) (t & 0xFFFFFFFFll);
+		C[i] = (unsigned int) (temp & 0xFFFFFFFFll);
 	}
 	carry = (old_C[7]>C[7]);
 }
@@ -65,7 +65,7 @@ void key_setup(){
 			C[i] = (key[(i+4)%8]<<16) | (key[(i+5)%8]);
 		}
 	}
-    c=0;
+    carry=0;
 	for(int i=0;i<4;i++){
 		next_state();
 	}
