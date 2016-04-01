@@ -86,7 +86,10 @@ void key_setup(){
         C[(i + 4) & 0x7] ^= X[i];
 
 }
-vector <unsigned int> encrypt(vector <unsigned int> plain_text){
+void encrypt(vector <unsigned int> plain_text){
+	reset();
+	key_setup();
+	iv_setup();
 	vector <unsigned int> cipher_text;
 	for(int i=0;i<plain_text.size();){
 		next_state();
@@ -94,5 +97,10 @@ vector <unsigned int> encrypt(vector <unsigned int> plain_text){
 			cipher_text.push_back(plain_text[i] ^ X[j] ^ (X[(j+5)%8]>>16) ^ (X[(j+3)%8]<<16) );
 		}
 	}
-	return cipher_text;
+	printf("Cipher text in hex:\n");
+	for(int i=0;i<cipher_text.size();i++){
+		printf("%02X %02X %02X %02X ",(cipher_text[i]&0x000000FF),(cipher_text[i]&0x0000FF00)>>8,
+		(cipher_text[i]&0x00FF0000)>>16,(cipher_text[i]&0xFF000000)>>24);
+	}
+	cout<<endl;
 }
