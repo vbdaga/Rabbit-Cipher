@@ -42,11 +42,14 @@ int main(int argc, char const *argv[])
 {
 	for(int i=0;i<8;i++)
 		key[i] = 0;
+	for(int i=0;i<2;i++)
+		iv[i] = 0;
 	vector <unsigned int> plaintext;
 	for(int i=0;i<8;i++)
 		plaintext.push_back(0);
 	reset();
 	key_setup();
+	iv_setup();
 	vector <unsigned int> cipher;
 	cipher = encrypt(plaintext);
 	for(int i=0;i<cipher.size();i++){

@@ -8,7 +8,7 @@
 #include <algorithm>
 using namespace std;
 unsigned int key[8];
-unsigned int iv[4];
+unsigned int iv[2];
 unsigned int X[8];
 unsigned int C[8],old_C[8];
 unsigned int A[8];
@@ -52,6 +52,19 @@ void next_state(){
 			X[i] = g[i] + rotate_left(g[(i+7)%8],8) + g[(i+6)%8];
 		else
 			X[i] = g[i] + rotate_left(g[(i+7)%8],16) + rotate_left(g[(i+6)%8],16);
+	}
+}
+void iv_setup(){
+	C[0]^=iv[0];
+	C[2]^=iv[1];
+	C[4]^=iv[0];
+	C[6]^=iv[1];
+	C[1]^=( ((iv[1]>>16)<<16) | ((iv[0]>>16)) );
+	C[3]^=( (iv[1]<<16) | ((iv[0]<<16)>>16) );
+	C[5]^=( ((iv[1]>>16)<<16) | ((iv[0]>>16)) );
+	C[7]^=( (iv[1]<<16) | ((iv[0]<<16)>>16) );
+	for(int i=0;i<4;i++){
+		next_state();
 	}
 }
 void key_setup(){
