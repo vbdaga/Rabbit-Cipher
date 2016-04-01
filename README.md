@@ -15,8 +15,8 @@ Then call the encrypt() function with the message to be encrypted in a vector of
 
 ### Example
 
-key1 = [00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00]
+key1 = [0000 0000 0000 0000 0000 0000 0000 0000]
 
-plain_text = [00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00]
+plain_text = [0000 0000 0000 0000 ]
 
 cipher_text = [02 F7 4A 1C 26 45 6B F5 EC D6 A5 36 F0 54 57 B1]
