@@ -14,10 +14,11 @@ unsigned int X[8];
 unsigned int C[8],old_C[8];
 unsigned int A[8];
 unsigned int carry;
-unsigned int rotate_left(unsigned int v, unsigned int k) {
-	return (k%32 == 0) ? v : ((v << k) | (v >> (32 - k)));
+unsigned int g[8];
+inline unsigned int rotate_left_optimise(unsigned int v, unsigned int k) {
+	return (k & 31 == 0) ? v : ((v << k) | (v >> (32 - k)));
 }
-void reset(){
+inline void reset_optimise(){
 	for(int i=0;i<8;i++){
 		X[i] = C[i] = 0;
 	}
@@ -25,37 +26,36 @@ void reset(){
 	A[1] = A[4] = A[7] = 0xD34D34D3;
 	A[2] = A[5] = 0x34D34D34;
 }
-void counter_system(){
+inline void counter_system_optimise(){
 	long long temp;
 	long long b=0;
 	for(int i=0;i<8;i++) old_C[i]=C[i];
 
-	temp = (C[0] % maxsize) + (A[0] % maxsize) + carry;
-    C[0] = (unsigned int) (temp % maxsize);
+	temp = (C[0] & (maxsize-1)) + (A[0] & (maxsize-1)) + carry;
+    C[0] = (unsigned int) (temp & (maxsize-1));
 
 	for(int i=1;i<8;i++) {
-		temp = (C[i] % maxsize) + (A[i] % maxsize) + (old_C[i-1]>C[i-1]);
-		C[i] = (unsigned int) (temp % maxsize);
+		temp = (C[i] & (maxsize-1)) + (A[i] & (maxsize-1)) + (old_C[i-1]>C[i-1]);
+		C[i] = (unsigned int) (temp & (maxsize-1));
 	}
 	carry = (old_C[7]>C[7]);
 }
-void next_state(){
-	counter_system();
-	unsigned int g[8];
+inline void next_state_optimise(){
+	counter_system_optimise();
 	long long temp;
 	for(int i=0;i<8;i++) {
-		temp = (X[i] + C[i]) % maxsize;
+		temp = (X[i] + C[i]) & (maxsize-1);
 		temp = temp*temp;
-		g[i] = (unsigned int)( ((temp) ^ (temp >> 32))% maxsize);
+		g[i] = (unsigned int)( ((temp) ^ (temp >> 32))& (maxsize-1));
 	}
 	for(int i=0;i<8;i++){
 		if(i&1)
-			X[i] = g[i] + rotate_left(g[(i+7)%8],8) + g[(i+6)%8];
+			X[i] = g[i] + rotate_left_optimise(g[(i+7) & 7],8) + g[(i+6) & 7];
 		else
-			X[i] = g[i] + rotate_left(g[(i+7)%8],16) + rotate_left(g[(i+6)%8],16);
+			X[i] = g[i] + rotate_left_optimise(g[(i+7) & 7],16) + rotate_left_optimise(g[(i+6) & 7],16);
 	}
 }
-void iv_setup(){
+inline void iv_setup_optimise(){
 	C[0]^=iv[0];
 	C[2]^=iv[1];
 	C[4]^=iv[0];
@@ -64,37 +64,39 @@ void iv_setup(){
 	C[3]^=( (iv[1]<<16) | ((iv[0]<<16)>>16) );
 	C[5]^=( ((iv[1]>>16)<<16) | ((iv[0]>>16)) );
 	C[7]^=( (iv[1]<<16) | ((iv[0]<<16)>>16) );
-	for(int i=0;i<4;i++){
-		next_state();
-	}
+	next_state_optimise();
+	next_state_optimise();
+	next_state_optimise();
+	next_state_optimise();
 }
-void key_setup(){
+inline void key_setup_optimise(){
 	for(int i=0;i<8;i++){
-		if(i%2){
-			X[i] = (key[(i+5)%8]<<16) | key[(i+4)%8];
-			C[i] = (key[i]<<16) | (key[(i+1)%8]);
+		if(i&1){
+			X[i] = (key[(i+5)&7]<<16) | key[(i+4)&7];
+			C[i] = (key[i]<<16) | (key[(i+1)&7]);
 		}
 		else{
-			X[i] = (key[(i+1)%8]<<16) | key[i];
-			C[i] = (key[(i+4)%8]<<16) | (key[(i+5)%8]);
+			X[i] = (key[(i+1)&7]<<16) | key[i];
+			C[i] = (key[(i+4)&7]<<16) | (key[(i+5)&7]);
 		}
 	}
     carry=0;
-	for(int i=0;i<4;i++){
-		next_state();
-	}
+	next_state_optimise();
+	next_state_optimise();
+	next_state_optimise();
+	next_state_optimise();
 	for (int i = 0; i < 8; i++)
-        C[(i + 4) %8] ^= X[i];
+        C[(i + 4) &7] ^= X[i];
 
 }
-void encrypt(vector <unsigned int> plain_text,bool do_iv_setup=true){
-	reset();
-	key_setup();
+inline void encrypt_optimise(vector <unsigned int> plain_text,bool do_iv_setup=true){
+	reset_optimise();
+	key_setup_optimise();
 	if(do_iv_setup)
-		iv_setup();
+		iv_setup_optimise();
 	vector <unsigned int> cipher_text;
 	for(int i=0;i<plain_text.size();){
-		next_state();
+		next_state_optimise();
 		for(int j=0;j<8 && i<plain_text.size();j+=2,i++){
 			cipher_text.push_back(plain_text[i] ^ X[j] ^ (X[(j+5)%8]>>16) ^ (X[(j+3)%8]<<16) );
 		}
