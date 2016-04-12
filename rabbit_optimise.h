@@ -1,3 +1,4 @@
+#include "binary_convert.h"
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -98,13 +99,15 @@ inline void encrypt_optimise(vector <unsigned int> plain_text,bool do_iv_setup=t
 	for(int i=0;i<plain_text.size();){
 		next_state_optimise();
 		for(int j=0;j<8 && i<plain_text.size();j+=2,i++){
-			cipher_text.push_back(plain_text[i] ^ X[j] ^ (X[(j+5)%8]>>16) ^ (X[(j+3)%8]<<16) );
+			unsigned int temp = plain_text[i] ^ X[j] ^ (X[(j+5)%8]>>16) ^ (X[(j+3)%8]<<16);
+			cipher_text.push_back(temp);
+			convert(temp);
 		}
 	}
-	printf("Cipher text in hex:\n");
+	//printf("Cipher text in hex:\n");
 	for(int i=0;i<cipher_text.size();i++){
-		printf("%02X %02X %02X %02X ",(cipher_text[i]&0x000000FF),(cipher_text[i]&0x0000FF00)>>8,
-		(cipher_text[i]&0x00FF0000)>>16,(cipher_text[i]&0xFF000000)>>24);
+		//printf("%02X %02X %02X %02X ",(cipher_text[i]&0x000000FF),(cipher_text[i]&0x0000FF00)>>8,
+		//(cipher_text[i]&0x00FF0000)>>16,(cipher_text[i]&0xFF000000)>>24);
 	}
-	cout<<endl;
+	//cout<<endl;
 }
