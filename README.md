@@ -21,4 +21,4 @@ plain_text = [0000 0000 0000 0000 ]
 
 iv = [0000 0000]
 
-cipher_text = [02 F7 4A 1C 26 45 6B F5 EC D6 A5 36 F0 54 57 B1]
+cipher_text = [ED B7 05 67 37 5D CD 7C D8 95 54 F8 5E 27 A7 C6]
