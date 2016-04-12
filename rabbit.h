@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 using namespace std;
+unsigned long long maxsize = 4294967296ll;
 unsigned int key[8];
 unsigned int iv[2];
 unsigned int X[8];
@@ -29,12 +30,12 @@ void counter_system(){
 	long long b=0;
 	for(int i=0;i<8;i++) old_C[i]=C[i];
 
-	temp = (C[0] & 0xFFFFFFFFll) + (A[0] & 0xFFFFFFFFll) + carry;
-    C[0] = (unsigned int) (temp & 0xFFFFFFFFll);
+	temp = (C[0] % maxsize) + (A[0] % maxsize) + carry;
+    C[0] = (unsigned int) (temp % maxsize);
 
 	for(int i=1;i<8;i++) {
-		temp = (C[i] & 0xFFFFFFFFll) + (A[i] & 0xFFFFFFFFll) + (old_C[i-1]>C[i-1]);
-		C[i] = (unsigned int) (temp & 0xFFFFFFFFll);
+		temp = (C[i] % maxsize) + (A[i] % maxsize) + (old_C[i-1]>C[i-1]);
+		C[i] = (unsigned int) (temp % maxsize);
 	}
 	carry = (old_C[7]>C[7]);
 }
@@ -43,9 +44,9 @@ void next_state(){
 	unsigned int g[8];
 	long long temp;
 	for(int i=0;i<8;i++) {
-		temp = (X[i] + C[i]) & 0xFFFFFFFF;
+		temp = (X[i] + C[i]) % maxsize;
 		temp = temp*temp;
-		g[i] = (unsigned int)( ((temp) ^ (temp >> 32))& 0xFFFFFFFF);
+		g[i] = (unsigned int)( ((temp) ^ (temp >> 32))% maxsize);
 	}
 	for(int i=0;i<8;i++){
 		if(i&1)
@@ -69,7 +70,7 @@ void iv_setup(){
 }
 void key_setup(){
 	for(int i=0;i<8;i++){
-		if(i&1){
+		if(i%2){
 			X[i] = (key[(i+5)%8]<<16) | key[(i+4)%8];
 			C[i] = (key[i]<<16) | (key[(i+1)%8]);
 		}
@@ -83,7 +84,7 @@ void key_setup(){
 		next_state();
 	}
 	for (int i = 0; i < 8; i++)
-        C[(i + 4) & 0x7] ^= X[i];
+        C[(i + 4) %8] ^= X[i];
 
 }
 void encrypt(vector <unsigned int> plain_text){
