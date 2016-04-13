@@ -1,4 +1,4 @@
-#include <iostream>
+#include <cstdio>
 #include <string>
 using namespace std;
 inline void convert(unsigned int val){
@@ -11,5 +11,5 @@ inline void convert(unsigned int val){
 		val/=2;
 		i--;
 	}
-	puts(s);
+	puts(s.c_str());
 }
